@@ -1,21 +1,21 @@
-require("dotenv").config();
+require("dotenv").config(); // importing dotenv module and calling its config() method, dotenv module is used to load environment variables from a .env file into the Node.js environment.
 
-const express = require("express");
-const bodyParser = require("body-parser");
-const pdf = require("html-pdf");
-const cors = require("cors");
-const { MongoClient } = require("mongodb");
-const { OAuth2Client } = require("google-auth-library");
-const jwt = require("jsonwebtoken");
+const express = require("express"); //importing express module a framework of nodejs
+const bodyParser = require("body-parser"); //importing body-parser to parse incoming request bodies in middleware, making it easier to work with data submitted via HTTP POST requests.
+const pdf = require("html-pdf"); //importing the html-pdf module. enables the creation of PDF files from HTML content. It's useful when we want to generate PDF documents programmatically.
+const cors = require("cors"); //importing cors, cors module helps in configuring CORS settings for Express.js applications
+const { MongoClient } = require("mongodb"); //imports the MongoClient class from the mongodb module
+const { OAuth2Client } = require("google-auth-library"); //imports the OAuth2Client class from the google-auth-library module
+const jwt = require("jsonwebtoken"); //imports the jsonwebtoken module
 
-const GOOGLE_CLIENT_ID = "794968404021-vr1ps70ib6lm90c3oa2o1jrd79v94u3d.apps.googleusercontent.com";
-const URI = process.env.MONGO_URI;
+const GOOGLE_CLIENT_ID = "794968404021-vr1ps70ib6lm90c3oa2o1jrd79v94u3d.apps.googleusercontent.com"; //defining a constant named GOOGLE_CLIENT_ID and assigns it a string value
+const URI = "mongodb://127.0.0.1:27017/" //process.env.MONGO_URI; //seting up a constant named URI and assigning it the value of an environment variable named MONGO_URI
+console.log("db url", URI)
+const googleclient = new OAuth2Client(GOOGLE_CLIENT_ID); //creating an instance of the OAuth2Client class from the google-auth-library module
+const mongoclient = new MongoClient(URI);  //creating an instance of the MongoClient class from the mongodb module
 
-const googleclient = new OAuth2Client(GOOGLE_CLIENT_ID);
-const mongoclient = new MongoClient(URI);
-
-let DB;
-try {
+let DB;  //declaring variable DB
+try {               //try block to handle potential error that might occur in execution
   // Connect to the MongoDB cluster
   mongoclient.connect();
   console.log("Connected to MongoDB !");
@@ -126,6 +126,7 @@ app.post("/signup", async (req, res) => {
     });
   }
 });
+
 
 app.post("/login", async (req, res) => {
   try {
@@ -245,6 +246,25 @@ app.get("/fetch-pdf", (req, res) => {
   const file = `${__dirname}/Resume.pdf`;
   res.download(file);
 });
+
+app.post("/fetchcandidateinfo",(req,res)=>{
+  console.log("query for user details")
+  let querydata=req.body.userid.split("_")
+  DB.collection("resume")
+  .findOne({
+    "firstname":querydata[0],
+    "userid":querydata[1]
+          })
+  .then(docs=>{
+    console.log("userdata",docs);
+
+      res.status(200).send({message:"candidate data",result:docs}) 
+  }).catch(
+    err=>{
+     res.status(404).send("data not found") 
+    }
+  )
+})
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Server started on port ${port}`));

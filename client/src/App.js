@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
+
 import "./App.css";
 import Resume from "./components/Resume";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import ViewDetails from "./components/ViewDetails";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -69,6 +71,12 @@ export function App() {
             path="/login"
             element={user?.email ? <Resume user={user} /> : <Login />}
           ></Route>
+          <Route
+            exact
+            path="/viewdetails/:paramId"
+            element={<ViewDetails />}
+          />
+
         </Routes>
       </BrowserRouter>
     </div>

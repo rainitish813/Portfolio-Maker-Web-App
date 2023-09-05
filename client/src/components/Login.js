@@ -7,46 +7,47 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const Login = () => {
   const { handleGoogle, loading, error } = useFetch(
-    "http://localhost:3000/login"
+    "http://localhost:4000/login"
   );
-
   useEffect(() => {
     /* global google */
     if (window.google) {
       google.accounts.id.initialize({
         client_id: "794968404021-vr1ps70ib6lm90c3oa2o1jrd79v94u3d.apps.googleusercontent.com",
-        callback: handleGoogle,
+        callback: handleGoogle
       });
-
-      google.accounts.id.renderButton(document.getElementById("loginDiv"), {
-        theme: "filled_black",
-        text: "signin_with",
-        shape: "pill",
-      });
-
-      google.accounts.id.prompt();
+      if (window.google) {
+        google.accounts.id.renderButton(document.getElementById("loginDiv"), {
+          theme: "filled_black",
+          text: "signin_with",
+          shape: "pill",
+        });
+        google.accounts.id.prompt();
+      }
     }
   }, [handleGoogle]);
+
+
 
   return (
     <div>
       <NavBar></NavBar>
-      <br/>
+      <br />
       <Button
-          component={Link}
-          to="/"
-          variant="contained"
-          color="primary"
-        >
-          <ArrowBackIcon style={{marginRight:"5px"}}/> Back
-        </Button>
-      <br/>
-      <br/>
+        component={Link}
+        to="/"
+        variant="contained"
+        color="primary"
+      >
+        <ArrowBackIcon style={{ marginRight: "5px" }} /> Back
+      </Button>
+      <br />
+      <br />
 
       <header style={{ textAlign: "center" }}>
         <h1>LOGIN TO CONTINUE</h1>
       </header>
-      <br/>
+      <br />
       <main
         style={{
           display: "flex",

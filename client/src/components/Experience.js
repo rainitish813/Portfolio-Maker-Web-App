@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import {TextField, Button, Container, Divider} from '@material-ui/core';
-import {Card, CardHeader, CardContent} from '@material-ui/core';
+import React, { Component } from 'react';
+import { TextField, Button, Container, Divider } from '@material-ui/core';
+import { Card, CardHeader, CardContent } from '@material-ui/core';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import DescriptionIcon from '@material-ui/icons/Description';
@@ -9,19 +9,14 @@ import TimelapseIcon from '@material-ui/icons/Timelapse';
 import EventSeatIcon from '@material-ui/icons/EventSeat';
 import BusinessIcon from '@material-ui/icons/Business';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import {Row, Col} from 'react-bootstrap';
-import {Paper, withStyles, Grid} from '@material-ui/core';
+import { Row, Col } from 'react-bootstrap';
+import { Paper, withStyles, Grid } from '@material-ui/core';
 import Snackbar from "@material-ui/core/Snackbar";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiAlert from '@mui/material/Alert';
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
-
-const styles = theme => ({
+const styles = (theme) => ({
   margin: {
     margin: theme.spacing(1.5),
   },
@@ -30,19 +25,32 @@ const styles = theme => ({
   },
 });
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 class Experience extends Component {
   state = {
-    open: false,
+    projects: [{ id: 1, ...this.getInitialProjectData() }],
   };
 
-  continue = e => {
-    e.preventDefault ();
-    this.props.nextStep ();
+  getInitialProjectData() {
+    return {
+      institute: '',
+      position: '',
+      duration: '',
+      experienceDescription: '',
+    };
+  }
+
+  continue = (e) => {
+    e.preventDefault();
+    this.props.nextStep();
   };
 
-  back = e => {
-    e.preventDefault ();
-    this.props.prevStep ();
+  back = (e) => {
+    e.preventDefault();
+    this.props.prevStep();
   };
 
   save = (e) => {
@@ -50,47 +58,44 @@ class Experience extends Component {
     promise
       .then((res) => {
         if (res.status === 200) {
-          this.setState((prevState) => ({
-            open: true,
-          }));
+          this.setState({ open: true });
         }
       })
       .catch((err) => console.log(err));
   };
 
   handleClick = () => {
-    this.setState((prevState) => ({
-      open: true,
-    }));
+    this.setState({ open: true });
   };
 
   handleClose = (event, reason) => {
-    if (reason === "clickaway") {
+    if (reason === 'clickaway') {
       return;
     }
 
+    this.setState({ open: false });
+  };
+
+  handleAddProject = () => {
+    const { projects } = this.state;
+    const newProjectId = projects[projects.length - 1].id + 1;
+    const newProjectData = { id: newProjectId, ...this.getInitialProjectData() };
     this.setState((prevState) => ({
-      open: false,
+      projects: [...prevState.projects, newProjectData],
     }));
   };
 
-  action = (
-    <React.Fragment>
-      <IconButton
-        size="small"
-        aria-label="close"
-        color="inherit"
-        onClick={this.handleClose}
-      >
-        <CloseIcon fontSize="small" />
-      </IconButton>
-    </React.Fragment>
-  );
+  handleRemoveProject = (projectId) => {
+    const { projects } = this.state;
+    if (projects.length > 1) {
+      const updatedProjects = projects.filter((project) => project.id !== projectId);
+      this.setState({ projects: updatedProjects });
+    }
+  };
 
-  render () {
-    const {values} = this.props;
-    const {classes} = this.props;
-
+  render() {
+    const { classes } = this.props;
+    const { projects } = this.state;
     return (
       <Paper className={classes.padding}>
         <Card>
@@ -98,198 +103,114 @@ class Experience extends Component {
         </Card>
         <CardContent>
           <div className={classes.margin}>
-            <Grid container spacing={2} alignItems="center" lg={12}>
-              <Grid
-                item
-                xs={12}
-                lg={4}
-                alignItems="flex-end"
-                alignContent="flex-end"
-              >
-                <h5>
-                  <CheckCircleIcon />
-                  <span className="pl-3">Experience 1</span>
-                </h5>
+            {projects.map((project) => (
+              <Grid container spacing={2} alignItems="center" key={project.id}>
+                <Grid item xs={12} lg={4}>
+                  <h5>
+                    <CheckCircleIcon />
+                    <span className="pl-3">Experience {project.id}</span>
+                  </h5>
+                </Grid>
+                <Grid item xs={0} lg={8} />
+                <Grid item md={4} sm={12} xs={12} lg={4}>
+                  <TextField
+                    margin="dense"
+                    variant="outlined"
+                    name={`institute${project.id}`}
+                    label="Institue/Organisation"
+                    style={{ width: '90%' }}
+                    required
+                    value={project.institute}
+                    onChange={this.props.handleChange}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="start">
+                          <BusinessIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item md={4} sm={6} xs={12} lg={4}>
+                  <TextField
+                    margin="dense"
+                    variant="outlined"
+                    name={`position${project.id}`}
+                    label="Position"
+                    style={{ width: '90%' }}
+                    required
+                    value={project.position}
+                    onChange={this.props.handleChange}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="start">
+                          <EventSeatIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item md={4} sm={6} xs={12} lg={4}>
+                  <TextField
+                    margin="dense"
+                    variant="outlined"
+                    name={`duration${project.id}`}
+                    label="Duration"
+                    style={{ width: '90%' }}
+                    required
+                    value={project.duration}
+                    onChange={this.props.handleChange}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="start">
+                          <TimelapseIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item md={12} sm={12} xs={12} lg={12}>
+                  <TextField
+                    margin="dense"
+                    label="Description"
+                    variant="outlined"
+                    style={{ width: '97%' }}
+                    name={`experienceDescription${project.id}`}
+                    required
+                    value={project.experienceDescription}
+                    onChange={this.props.handleChange}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="start">
+                          <DescriptionIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                {projects.length > 1 && (
+                  <Grid item md={12} sm={12} xs={12} lg={12}>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => this.handleRemoveProject(project.id)}
+                    >
+                      Remove
+                    </Button>
+                  </Grid>
+                )}
               </Grid>
-              <Grid item xs={0} lg={8} />
-
-              <Grid item md={4} sm={12} xs={12} lg={4}>
-                <TextField
-                  margin="dense"
-                  variant="outlined"
-                  name="institute1"
-                  label="Institue/Organisation"
-                  style={{width: '90%'}}
-                  required
-                  value={values.institute1}
-                  onChange={this.props.handleChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="start">
-                        <BusinessIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item md={4} sm={6} xs={12} lg={4}>
-                <TextField
-                  margin="dense"
-                  variant="outlined"
-                  name="position1"
-                  label="Position"
-                  style={{width: '90%'}}
-                  required
-                  value={values.position1}
-                  onChange={this.props.handleChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="start">
-                        <EventSeatIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item md={4} sm={6} xs={12} lg={4}>
-                <TextField
-                  margin="dense"
-                  variant="outlined"
-                  name="duration1"
-                  label="Duration"
-                  style={{width: '90%'}}
-                  required
-                  value={values.duration1}
-                  onChange={this.props.handleChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="start">
-                        <TimelapseIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item md={12} sm={12} xs={12} lg={12}>
-                <TextField
-                  margin="dense"
-                  label="Description"
-                  variant="outlined"
-                  style={{width: '97%'}}
-                  name="experienceDescription1"
-                  required
-                  value={values.experienceDescription1}
-                  onChange={this.props.handleChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="start">
-                        <DescriptionIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-            </Grid>
+            ))}
             <br />
             <Divider />
             <br />
-            <Grid container spacing={2} alignItems="flex-start" lg={12}>
-              <Grid
-                item
-                xs={12}
-                lg={4}
-                alignItems="flex-end"
-                alignContent="flex-end"
-              >
-                <h5>
-                  <CheckCircleIcon />
-                  <span className="pl-3">Experience 2</span>
-                </h5>
-              </Grid>
-              <Grid item xs={0} lg={8} />
-              <br />
-              <Grid item md={4} sm={12} xs={12} lg={4}>
-                <TextField
-                  margin="dense"
-                  variant="outlined"
-                  name="institute2"
-                  label="Institue/Organisation"
-                  style={{width: '90%'}}
-                  required
-                  value={values.institute2}
-                  onChange={this.props.handleChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="start">
-                        <BusinessIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item md={4} sm={6} xs={12} lg={4}>
-                <TextField
-                  margin="dense"
-                  variant="outlined"
-                  name="position2"
-                  label="Position"
-                  style={{width: '90%'}}
-                  required
-                  value={values.position2}
-                  onChange={this.props.handleChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="start">
-                        <EventSeatIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item md={4} sm={6} xs={12} lg={4}>
-                <TextField
-                  margin="dense"
-                  variant="outlined"
-                  name="duration2"
-                  label="Duration"
-                  style={{width: '90%'}}
-                  required
-                  value={values.duration2}
-                  onChange={this.props.handleChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="start">
-                        <TimelapseIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              <Grid item md={12} sm={12} xs={12} lg={12}>
-                <TextField
-                  margin="dense"
-                  label="Description"
-                  variant="outlined"
-                  style={{width: '97%'}}
-                  rows={3}
-                  name="experienceDescription2"
-                  required
-                  value={values.experienceDescription2}
-                  onChange={this.props.handleChange}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="start">
-                        <DescriptionIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-            </Grid>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={this.handleAddProject}
+            >
+              Add Experience
+            </Button>
           </div>
         </CardContent>
         <Container className={classes.margin}>
@@ -310,7 +231,7 @@ class Experience extends Component {
                 variant="contained"
                 color="secondary"
                 onClick={this.continue}
-                endIcon={<NavigateNextIcon />}
+                end endIcon={<NavigateNextIcon />}
               >
                 Next
               </Button>
@@ -342,4 +263,4 @@ class Experience extends Component {
   }
 }
 
-export default withStyles (styles) (Experience);
+export default withStyles(styles)(Experience);

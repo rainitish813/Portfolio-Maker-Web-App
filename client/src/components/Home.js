@@ -56,14 +56,14 @@ const Home = () => {
       </Box>
       <Divider></Divider>
 
-      <br/><br/>
+      <br /><br />
       <main style={{ display: "flex", justifyContent: "center", gap: "2rem" }}>
         <Button
           component={Link}
           to="/signup"
           variant="contained"
           color="primary"
-          // style={{ "&:hover": { backgroundColor: "transparent" } }}
+        // style={{ "&:hover": { backgroundColor: "transparent" } }}
         >
           Sign Up
         </Button>

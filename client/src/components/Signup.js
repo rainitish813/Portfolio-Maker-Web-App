@@ -33,22 +33,22 @@ const SignUp = () => {
 
   return (
     <>
-    <NavBar></NavBar>
-    <br/>
+      <NavBar></NavBar>
+      <br />
       <Button
-          component={Link}
-          to="/"
-          variant="contained"
-          color="primary"
-        >
-          <ArrowBackIcon style={{marginRight:"5px"}}/> Back
-        </Button>
-      <br/>
-      <br/>
+        component={Link}
+        to="/"
+        variant="contained"
+        color="primary"
+      >
+        <ArrowBackIcon style={{ marginRight: "5px" }} /> Back
+      </Button>
+      <br />
+      <br />
       <header style={{ textAlign: "center" }}>
         <h1>REGISTER TO CONTINUE</h1>
       </header>
-      <br/>
+      <br />
       <main
         style={{
           display: "flex",
