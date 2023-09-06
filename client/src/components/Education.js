@@ -1,23 +1,19 @@
 import React, { Component } from "react";
-import {
-  TextField,
-  Button,
-  Container,
-  Divider,
-  IconButton,
-} from "@material-ui/core";
+import { TextField, Button, Container, Divider } from "@material-ui/core";
 import { Card, CardHeader, CardContent } from "@material-ui/core";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import { Row, Col } from "react-bootstrap";
 import { Paper, withStyles, Grid } from "@material-ui/core";
 import Snackbar from "@material-ui/core/Snackbar";
+import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import MuiAlert from "@mui/material/Alert";
+import MuiAlert from '@mui/material/Alert';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
+
 
 const styles = (theme) => ({
   margin: {
@@ -31,7 +27,6 @@ const styles = (theme) => ({
 class Education extends Component {
   state = {
     open: false,
-    educationFields: [{}], // Array to store education fields
   };
 
   continue = (e) => {
@@ -86,36 +81,9 @@ class Education extends Component {
     </React.Fragment>
   );
 
-  // Function to handle changes in education fields
-  handleChange = (e, index) => {
-    const { name, value } = e.target;
-    const { educationFields } = this.state;
-    educationFields[index][name] = value;
-    this.setState({ educationFields });
-  };
-
-  addEducationField = () => {
-    this.setState((prevState) => ({
-      educationFields: [...prevState.educationFields, {}],
-    }));
-  };
-
-  removeEducationFields = () => {
-    const { educationFields } = this.state;
-
-    if (educationFields.length > 1) {
-
-      educationFields.pop();
-      this.setState({ educationFields });
-    } else if (educationFields.length === 1) {
-
-      this.setState({ educationFields: [{}] });
-    }
-  };
-
   render() {
+    const { values } = this.props;
     const { classes } = this.props;
-    const { educationFields } = this.state;
 
     return (
       <Paper className={classes.padding}>
@@ -124,90 +92,143 @@ class Education extends Component {
         </Card>
         <CardContent>
           <div className={classes.margin}>
-            {educationFields.map((field, index) => (
-              <Grid container spacing={2} alignItems="center" lg={12} key={index}>
-                <Grid item md={4} sm={12} xs={12} lg={4}>
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name={`college${index}`}
-                    label="College/University"
-                    style={{ width: "80%" }}
-                    required
-                    value={field.college}
-                    onChange={(e) => this.handleChange(e, index)}
-                  />
-                </Grid>
-                <Grid item md={4} sm={6} xs={12} lg={4}>
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name={`fromyear${index}`}
-                  
-                    type="date"
-                    style={{ width: "80%" }}
-                    required
-                    value={field.fromyear}
-                    onChange={(e) => this.handleChange(e, index)}
-                  />
-                </Grid>
-                <Grid item md={4} sm={6} xs={12} lg={4}>
-                  <TextField
-                    margin="dense"
-                    variant="outlined"
-                    name={`toyear${index}`}
-                    type="date"
-                    style={{ width: "80%" }}
-                    required
-                    value={field.toyear}
-                    onChange={(e) => this.handleChange(e, index)}
-                  />
-                </Grid>
-                <Grid item md={4} sm={12} xs={12} lg={4}>
-                  <TextField
-                    margin="dense"
-                    label={`Qualification ${index + 1}`}
-                    variant="outlined"
-                    style={{ width: "80%" }}
-                    name={`qualification${index}`}
-                    required
-                    value={field.qualification}
-                    onChange={(e) => this.handleChange(e, index)}
-                  />
-                </Grid>
-                <Grid item md={8} sm={12} xs={12} lg={8}>
-                  <TextField
-                    margin="dense"
-                    label={`Description ${index + 1}`}
-                    variant="outlined"
-                    style={{ width: "90%" }}
-                    name={`description${index}`}
-                    required
-                    value={field.description}
-                    onChange={(e) => this.handleChange(e, index)}
-                  />
-                </Grid>
-                <Button
+            <Grid container spacing={2} alignItems="center" lg={12}>
+              <Grid item md={4} sm={12} xs={12} lg={4}>
+                <TextField
+                  margin="dense"
                   variant="outlined"
-                  color="secondary"
-                  size="5px"
-                  onClick={this.removeEducationFields}
-                >
-                  Remove
-                </Button>
+                  name="college"
+                  label="College/Unviersity"
+                  style={{ width: "80%" }}
+                  required
+                  value={values.college}
+                  onChange={this.props.handleChange}
+                />
               </Grid>
-            ))}
+              <Grid item md={4} sm={6} xs={12} lg={4}>
+                <TextField
+                  margin="dense"
+                  variant="outlined"
+                  name="fromyear1"
+                  label="From Year"
+                  type="date"
+                  style={{ width: "80%" }}
+                  required
+                  value={values.fromyear1}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
+
+              <Grid item md={4} sm={6} xs={12} lg={4}>
+                <TextField
+                  margin="dense"
+                  variant="outlined"
+                  name="toyear1"
+                  type="date"
+                  label="To Year"
+                  style={{ width: "80%" }}
+                  required
+                  value={values.toyear1}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
+
+              <Grid item md={4} sm={12} xs={12} lg={4}>
+                <TextField
+                  margin="dense"
+                  label="Qualification"
+                  variant="outlined"
+                  style={{ width: "80%" }}
+                  name="qualification1"
+                  required
+                  value={values.qualification1}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
+
+              <Grid item md={8} sm={12} xs={12} lg={8}>
+                <TextField
+                  margin="dense"
+                  label="Description"
+                  variant="outlined"
+                  style={{ width: "90%" }}
+                  name="description1"
+                  required
+                  value={values.description1}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
+            </Grid>
             <br />
             <Divider />
             <br />
+            <Grid container spacing={2} alignItems="center" lg={12}>
+              <Grid item md={4} sm={12} xs={12} lg={4}>
+                <TextField
+                  margin="dense"
+                  variant="outlined"
+                  name="school"
+                  label="School"
+                  style={{ width: "80%" }}
+                  required
+                  value={values.school}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
+              <Grid item md={4} sm={6} xs={12} lg={4}>
+                <TextField
+                  margin="dense"
+                  variant="outlined"
+                  name="fromyear2"
+                  label="From Year"
+                  type="date"
+                  style={{ width: "80%" }}
+                  required
+                  value={values.fromyear2}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
 
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={this.addEducationField}
-            >
-              +
-            </Button>
+              <Grid item md={4} sm={6} xs={12} lg={4}>
+                <TextField
+                  margin="dense"
+                  variant="outlined"
+                  name="toyear2"
+                  label="To Year"
+                  type="date"
+                  style={{ width: "80%" }}
+                  required
+                  value={values.toyear2}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
+
+              <Grid item md={4} sm={12} xs={12} lg={4}>
+                <TextField
+                  margin="dense"
+                  label="Qualification"
+                  variant="outlined"
+                  style={{ width: "80%" }}
+                  name="qualification2"
+                  required
+                  value={values.qualification2}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
+
+              <Grid item md={8} sm={8} xs={8} lg={8}>
+                <TextField
+                  margin="dense"
+                  label="Description"
+                  variant="outlined"
+                  style={{ width: "90%" }}
+                  name="description2"
+                  required
+                  value={values.description2}
+                  onChange={this.props.handleChange}
+                />
+              </Grid>
+            </Grid>
           </div>
         </CardContent>
         <Container className={classes.margin}>
@@ -260,11 +281,4 @@ class Education extends Component {
   }
 }
 
-
 export default withStyles(styles)(Education);
-
-
-
-
-
-

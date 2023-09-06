@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { TextField, Button, Container } from "@material-ui/core";
 import { Card, CardHeader, CardContent } from "@material-ui/core";
+import { Link, useNavigate } from "react-router-dom";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import EmailIcon from "@material-ui/icons/Email";
@@ -9,7 +10,6 @@ import LanguageIcon from "@material-ui/icons/Language";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import LinkedInIcon from "@material-ui/icons/LinkedIn";
 import TwitterIcon from "@material-ui/icons/Twitter";
-import axios from "axios";
 import FacebookIcon from "@material-ui/icons/Facebook";
 import InstagramIcon from "@material-ui/icons/Instagram";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -18,16 +18,11 @@ import { Paper, withStyles, Grid } from "@material-ui/core";
 import Snackbar from "@material-ui/core/Snackbar";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import MuiAlert from '@mui/material/Alert';
-
-
-
-
+import MuiAlert from "@mui/material/Alert";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
-
 
 const styles = (theme) => ({
   margin: {
@@ -37,22 +32,33 @@ const styles = (theme) => ({
     padding: theme.spacing(1),
   },
 });
-
 class Profile extends Component {
-  state = {
-    open: false,
-    allFieldsFilled: false,
-  };
+  // navigate =useNavigate()
+
+  constructor(props) {
+    super(props);
+
+    // Initialize the state and retrieve saved data from localStorage
+    const savedData = localStorage.getItem("formData");
+    this.state = {
+      open: false,
+      editMode: false,
+      formData: savedData ? JSON.parse(savedData) : {},
+    };
+  }
 
   requiredFields = ["firstname", "lastname", "email", "phone", "website"];
 
   componentDidMount() {
     this.validateAllFields();
   }
-
+  continue = (e) => {
+    e.preventDefault();
+    this.props.nextStep();
+  };
   validateAllFields = () => {
-    const { values } = this.props;
-    const allFilled = this.requiredFields.every(field => !values[field]);
+    const { formData } = this.state;
+    const allFilled = this.requiredFields.every((field) => formData[field]);
     this.setState({ allFieldsFilled: allFilled });
   };
 
@@ -63,35 +69,22 @@ class Profile extends Component {
   };
 
   handleChange = (e) => {
-    this.props.handleChange(e);
-    this.validateAllFields();
-  };
-
-  continue = (e) => {
-    e.preventDefault();
-    this.props.nextStep();
-  };
-  DisplayPDF = () => {
-    axios
-      .post("create-pdf", this.props.values)
-      .then(() => {
-        axios
-          .get("fetch-pdf", { responseType: "arraybuffer" })
-          .then((res) => {
-            const pdfBlob = new Blob([res.data], { type: "application/pdf" });
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-
-
-            const newWindow = window.open();
-            newWindow.document.open();
-            newWindow.document.write(
-              `<iframe src="${pdfUrl}" width="100%" height="100%" style="border: none;"></iframe>`
-            );
-            newWindow.document.close();
-          })
-          .catch((err) => console.log(err));
+    const { name, value } = e.target;
+    // Update the form data in the state
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        [name]: value,
+      },
+    }));
+    // Save the form data to localStorage
+    localStorage.setItem(
+      "formData",
+      JSON.stringify({
+        ...this.state.formData,
+        [name]: value,
       })
-      .catch((err) => console.log(err));
+    );
   };
 
   save = (e) => {
@@ -99,18 +92,13 @@ class Profile extends Component {
     promise
       .then((res) => {
         if (res.status === 200) {
-          this.setState((prevState) => ({
+          this.setState({
             open: true,
             editMode: false,
-          }));
+          });
         }
       })
       .catch((err) => console.log(err));
-  };
-  handleClick = () => {
-    this.setState((prevState) => ({
-      open: true,
-    }));
   };
 
   handleClose = (event, reason) => {
@@ -118,9 +106,9 @@ class Profile extends Component {
       return;
     }
 
-    this.setState((prevState) => ({
+    this.setState({
       open: false,
-    }));
+    });
   };
 
   action = (
@@ -136,10 +124,17 @@ class Profile extends Component {
     </React.Fragment>
   );
 
+  // viewcandidate() {
+
+  //   History.pushState('/view')
+  //   // navigate('/view')
+  // }
+
   render() {
     const { values } = this.props;
     const { classes } = this.props;
     const { editMode } = this.state;
+
 
     return (
       <Paper className={classes.padding}>
@@ -151,14 +146,16 @@ class Profile extends Component {
         <CardContent>
           <div className={classes.margin}>
             {!editMode && (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={this.DisplayPDF}
-                style={{ marginRight: "10px" }}
-              >
-                View
-              </Button>
+              <Link to="/view">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  style={{ marginRight: "10px" }}
+
+                >
+                  View
+                </Button>
+              </Link>
             )}
 
             {!editMode ? (

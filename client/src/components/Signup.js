@@ -10,7 +10,6 @@ const SignUp = () => {
   const { handleGoogle, loading, error } = useFetch(
     "http://localhost:3000/signup"
   );
-
   useEffect(() => {
     /* global google */
     if (window.google) {
@@ -18,7 +17,6 @@ const SignUp = () => {
         client_id: "794968404021-vr1ps70ib6lm90c3oa2o1jrd79v94u3d.apps.googleusercontent.com",
         callback: handleGoogle,
       });
-
       google.accounts.id.renderButton(document.getElementById("signUpDiv"), {
         // type: "standard",
         theme: "filled_black",

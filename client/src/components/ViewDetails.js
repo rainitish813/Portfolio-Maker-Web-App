@@ -5,17 +5,25 @@ import axios from 'axios'
 function ViewDetails() {
 
     var [candidateData, setCandidateData] = useState({})
-    let { paramId } = useParams()
+    var [firstname, setFirstname] = useState()
+    var [userid, setUserId] = useState()
+    // let { paramId } = useParams()
+    
 
+    useEffect(() => {
+       setUserId(localStorage.getItem("userId")) 
+       console.log(userid);
+        setFirstname(localStorage.getItem("firstname"))
+       console.log(firstname);
 
-    // useEffect(() => {
-    //     getCandidateInfo()
-    // }, [])
+    }, [candidateData])
 
     const getCandidateInfo = () => {
+       let paramId=firstname+"_"+userid 
         console.log("entered param", paramId)
+       console.log(firstname);
 
-        axios.post('/fetchcandidateinfo', { userid: paramId })
+        axios.post('/fetchcandidateinfo', { "userid": paramId })
             .then(response => {
                 console.log(response.data.result)
                 setCandidateData(response.data.result)
@@ -33,13 +41,13 @@ function ViewDetails() {
         return (
             <div>
                 <h2>
-                    This is portfolio page of {paramId}
+                    This is portfolio page of 
                     <br/>
 
               <button onClick={getCandidateInfo()}>getcandidateinfo</button>
                 </h2>
                 <div>
-                    {candidateData.firstname}
+                    {firstname}
                 </div>
             </div>
         )

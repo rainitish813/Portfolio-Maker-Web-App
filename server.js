@@ -1,21 +1,21 @@
-require("dotenv").config(); // importing dotenv module and calling its config() method, dotenv module is used to load environment variables from a .env file into the Node.js environment.
+require("dotenv").config();
 
-const express = require("express"); //importing express module a framework of nodejs
-const bodyParser = require("body-parser"); //importing body-parser to parse incoming request bodies in middleware, making it easier to work with data submitted via HTTP POST requests.
-const pdf = require("html-pdf"); //importing the html-pdf module. enables the creation of PDF files from HTML content. It's useful when we want to generate PDF documents programmatically.
-const cors = require("cors"); //importing cors, cors module helps in configuring CORS settings for Express.js applications
-const { MongoClient } = require("mongodb"); //imports the MongoClient class from the mongodb module
-const { OAuth2Client } = require("google-auth-library"); //imports the OAuth2Client class from the google-auth-library module
-const jwt = require("jsonwebtoken"); //imports the jsonwebtoken module
+const express = require("express");
+const bodyParser = require("body-parser");
+const pdf = require("html-pdf");
+const cors = require("cors");
+const { MongoClient } = require("mongodb");
+const { OAuth2Client } = require("google-auth-library");
+const jwt = require("jsonwebtoken");
 
-const GOOGLE_CLIENT_ID = "794968404021-vr1ps70ib6lm90c3oa2o1jrd79v94u3d.apps.googleusercontent.com"; //defining a constant named GOOGLE_CLIENT_ID and assigns it a string value
-const URI = "mongodb://127.0.0.1:27017/" //process.env.MONGO_URI; //seting up a constant named URI and assigning it the value of an environment variable named MONGO_URI
-console.log("db url", URI)
-const googleclient = new OAuth2Client(GOOGLE_CLIENT_ID); //creating an instance of the OAuth2Client class from the google-auth-library module
-const mongoclient = new MongoClient(URI);  //creating an instance of the MongoClient class from the mongodb module
+const GOOGLE_CLIENT_ID = "794968404021-vr1ps70ib6lm90c3oa2o1jrd79v94u3d.apps.googleusercontent.com";
+const URI = process.env.MONGO_URI;
 
-let DB;  //declaring variable DB
-try {               //try block to handle potential error that might occur in execution
+const googleclient = new OAuth2Client(GOOGLE_CLIENT_ID);
+const mongoclient = new MongoClient(URI);
+
+let DB;
+try {
   // Connect to the MongoDB cluster
   mongoclient.connect();
   console.log("Connected to MongoDB !");
@@ -127,7 +127,6 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-
 app.post("/login", async (req, res) => {
   try {
     if (req.body.credential) {
@@ -150,10 +149,12 @@ app.post("/login", async (req, res) => {
           DB.collection("resume")
             .findOne({ userid: user?._id.toString() })
             .then((resumeDoc) => {
+              const userid = user?._id.toString(); // Get the userid
               res.status(201).json({
                 message: "Login was successful",
                 resume: resumeDoc,
                 user: {
+                  userId: userid, // Include the userid in the response
                   firstName: profile?.given_name,
                   lastName: profile?.family_name,
                   picture: profile?.picture,
@@ -178,40 +179,84 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/save", (req, res) => {
-  const { user, resume } = req.body;
-  delete resume.step;
 
-  DB.collection("users")
-    .findOne({ email: user.email })
-    .then((userDoc) => {
-      const USERID = userDoc._id.toString();
-      const data = {
-        userid: USERID,
-        ...resume,
-      };
-      DB.collection("resume")
-        .findOne({ userid: USERID })
-        .then((resumeDoc) => {
-          if (resumeDoc) {
-            DB.collection("resume")
-              .deleteOne({ userid: USERID })
-              .then(() => {
-                DB.collection("resume")
-                  .insertOne(data)
-                  .then(() => res.sendStatus(200))
-                  .catch((err) => res.send(err));
-              })
-              .catch((err) => console.log(err));
-          } else {
-            DB.collection("resume")
-              .insertOne(data)
-              .then(() => res.sendStatus(200))
-              .catch((err) => res.send(err));
-          }
+app.get("/fetchcandidateinfo/:userid", (req, res) => {
+  const { userid } = req.params;
+
+  // Check if the candidate exists in the database
+  // userid.split('_')
+
+  DB.collection("resume")
+    .findOne({ userid: userid }) // Assuming you have a "resume" collection with "userid" as a field
+    .then((candidate) => {
+      if (!candidate) {
+        return res.status(400).json({
+          message: "Candidate not found"
         });
+      } else {
+        return res.status(200).json({
+          result: candidate
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching candidate:", error);
+      return res.status(500).json({
+        message: "Internal Server Error"
+      });
     });
 });
+app.post
+  ("/fetchcandidateinfo", (req, res) => {
+    console.log("query for user details")
+    let querydata = req.body.userid.split("_")
+    DB.collection("resume")
+      .findOne({
+        "firstname": querydata[0],
+        "userid": querydata[1]
+      })
+      .then(docs => {
+        console.log("userdata", docs);
+
+        res.status(200).send({ message: "candidate data", result: docs })
+      }).catch(
+        err => {
+          res.status(404).send("data not found")
+        }
+      )
+  })
+
+app.post("/save", async (req, res) => {
+  try {
+    const { user, resume } = req.body;
+    delete resume.step;
+
+    const userDoc = await DB.collection("users").findOne({ email: user.email });
+    if (!userDoc) {
+      return res.status(404).send("User not found");
+    }
+
+    const USERID = userDoc._id.toString();
+    const data = {
+      userid: USERID,
+      ...resume,
+    };
+
+    const resumeDoc = await DB.collection("resume").findOne({ userid: USERID });
+
+    if (resumeDoc) {
+      await DB.collection("resume").deleteOne({ userid: USERID });
+    }
+
+    await DB.collection("resume").insertOne(data);
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
 app.post("/get-resume", (req, res) => {
   const { email } = req.body;
@@ -246,25 +291,5 @@ app.get("/fetch-pdf", (req, res) => {
   const file = `${__dirname}/Resume.pdf`;
   res.download(file);
 });
-
-app.post("/fetchcandidateinfo",(req,res)=>{
-  console.log("query for user details")
-  let querydata=req.body.userid.split("_")
-  DB.collection("resume")
-  .findOne({
-    "firstname":querydata[0],
-    "userid":querydata[1]
-          })
-  .then(docs=>{
-    console.log("userdata",docs);
-
-      res.status(200).send({message:"candidate data",result:docs}) 
-  }).catch(
-    err=>{
-     res.status(404).send("data not found") 
-    }
-  )
-})
-
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Server started on port ${port}`));

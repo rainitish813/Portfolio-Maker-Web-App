@@ -20,6 +20,9 @@ const useFetch = (url) => {
       })
       .then((data) => {
         if (data?.user) {
+          console.log("user data",data.user);
+          localStorage.setItem("userId", data.user.userId); 
+          localStorage.setItem("firstname", data.user.firstName); 
           localStorage.setItem("user", JSON.stringify(data?.user));
           window.location.replace("/");
         }
